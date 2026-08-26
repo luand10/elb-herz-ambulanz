@@ -192,11 +192,6 @@ async function loadEmployeeProfile(){
   let data=[];try{data=await response.json();}catch(_){}
   if(!response.ok)throw new Error(data.message||data.error||'Mitarbeiterprofil konnte nicht geladen werden.');
   employeeProfile=data[0]||null;
-  if(employeeProfile){
-    console.log('Mitarbeiterprofil geladen:', employeeProfile.name, employeeProfile.role);
-  }else{
-    console.warn('Kein Mitarbeiterprofil für', sessionUser.id, 'gefunden.');
-  }
   return employeeProfile;
  }catch(err){
   console.warn('Mitarbeiterprofil:',err);
@@ -350,7 +345,7 @@ $('confirmShiftStart').addEventListener('click',async function(){
  try{await startShift(type,location,note);if(currentShift)$('shiftModal').classList.add('hidden');}
  finally{btn.disabled=false;btn.textContent='Dienst starten';}
 });
-$('logout').addEventListener('click',async function(){
+async function doLogout(){
  if(currentShift&&!confirm('Der Dienst läuft noch. Wirklich abmelden?'))return;
  try{
   if(accessToken){
@@ -359,8 +354,11 @@ $('logout').addEventListener('click',async function(){
  }catch(e){console.error(e);}
  clearAuth();
  employeeProfile=null;
+ showAdmin(false);
  render();
-});
+}
+
+$('logout').addEventListener('click',doLogout);
 
 $('clearHistory').addEventListener('click',async function(){
  if(!sessionUser||syncBusy)return;
@@ -404,18 +402,11 @@ start();
 let adminRows = [];
 
 function isAdmin(){
-  const role = String(employeeProfile?.role || '').trim().toLowerCase();
-  return role === 'admin';
+  return !!employeeProfile && employeeProfile.role === 'admin';
 }
 function showAdmin(show){
-  const app = $('app');
-  const adminApp = $('adminApp');
-  if(!adminApp){
-    console.error('Admin-Bereich #adminApp wurde im HTML nicht gefunden.');
-    return;
-  }
-  app?.classList.toggle('hidden', show);
-  adminApp.classList.toggle('hidden', !show);
+  $('app').classList.toggle('hidden', show);
+  $('adminApp').classList.toggle('hidden', !show);
 }
 function msFmt(ms){
   const s=Math.max(0,Math.floor(ms/1000)),h=Math.floor(s/3600),m=Math.floor(s%3600/60);
@@ -498,45 +489,32 @@ async function saveEmployees(){
     alert(err.message||String(err));
   }finally{if(btn)btn.disabled=false;}
 }
-$('adminButton')?.addEventListener('click',async()=>{
-  // Das Dashboard sofort öffnen. Dadurch hängt die Navigation nicht
-  // davon ab, ob das erneute Laden des Profils kurz dauert.
-  if(!sessionUser){
-    alert('Bitte zuerst anmelden.');
-    return;
-  }
-
-  if(!isAdmin()){
-    await loadEmployeeProfile();
-    render();
-  }
-
-  if(!isAdmin()){
-    alert('Dein Account ist in der Mitarbeiter-Tabelle noch nicht als Admin erkannt.');
-    return;
-  }
-
-  showAdmin(true);
-
-  try{
-    await loadAdmin();
-  }catch(err){
-    console.error('Admin-Dashboard:',err);
-  }
-});
-$('adminBack')?.addEventListener('click',()=>{
-  showAdmin(false);
-  render();
-});
-
-document.addEventListener('DOMContentLoaded',()=>{
-  const back=$('adminBack');
-  if(back && !back.dataset.bound){
-    back.dataset.bound='1';
-    back.addEventListener('click',()=>{
-      showAdmin(false);
+// Admin- und Zurück-Buttons liegen im HTML unterhalb dieses Scripts.
+// Deshalb verwenden wir Event-Delegation: Die Buttons funktionieren
+// zuverlässig, auch wenn die Seite direkt nach dem Login gerendert wird.
+document.addEventListener('click',async (event)=>{
+  const adminBtn=event.target.closest('#adminButton');
+  if(adminBtn){
+    event.preventDefault();
+    if(!isAdmin()){
+      await loadEmployeeProfile();
       render();
-    });
+    }
+    if(!isAdmin()){
+      alert('Dein Account ist nicht als Admin erkannt.');
+      return;
+    }
+    showAdmin(true);
+    await loadAdmin();
+    return;
+  }
+
+  const backBtn=event.target.closest('#adminBack');
+  if(backBtn){
+    event.preventDefault();
+    showAdmin(false);
+    render();
+    return;
   }
 });
 $('exportCsv')?.addEventListener('click',()=>{

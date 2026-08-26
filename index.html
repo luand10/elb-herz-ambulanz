@@ -192,6 +192,11 @@ async function loadEmployeeProfile(){
   let data=[];try{data=await response.json();}catch(_){}
   if(!response.ok)throw new Error(data.message||data.error||'Mitarbeiterprofil konnte nicht geladen werden.');
   employeeProfile=data[0]||null;
+  if(employeeProfile){
+    console.log('Mitarbeiterprofil geladen:', employeeProfile.name, employeeProfile.role);
+  }else{
+    console.warn('Kein Mitarbeiterprofil für', sessionUser.id, 'gefunden.');
+  }
   return employeeProfile;
  }catch(err){
   console.warn('Mitarbeiterprofil:',err);
@@ -399,11 +404,18 @@ start();
 let adminRows = [];
 
 function isAdmin(){
-  return !!employeeProfile && employeeProfile.role === 'admin';
+  const role = String(employeeProfile?.role || '').trim().toLowerCase();
+  return role === 'admin';
 }
 function showAdmin(show){
-  $('app').classList.toggle('hidden', show);
-  $('adminApp').classList.toggle('hidden', !show);
+  const app = $('app');
+  const adminApp = $('adminApp');
+  if(!adminApp){
+    console.error('Admin-Bereich #adminApp wurde im HTML nicht gefunden.');
+    return;
+  }
+  app?.classList.toggle('hidden', show);
+  adminApp.classList.toggle('hidden', !show);
 }
 function msFmt(ms){
   const s=Math.max(0,Math.floor(ms/1000)),h=Math.floor(s/3600),m=Math.floor(s%3600/60);
@@ -486,10 +498,17 @@ async function saveEmployees(){
     alert(err.message||String(err));
   }finally{if(btn)btn.disabled=false;}
 }
-$('adminButton')?.addEventListener('click',()=>{
-  if(!isAdmin())return;
+$('adminButton')?.addEventListener('click',async()=>{
+  // Profil vor dem Öffnen noch einmal laden, damit ein frisch gesetzter
+  // Admin-Status sofort erkannt wird.
+  await loadEmployeeProfile();
+  render();
+  if(!isAdmin()){
+    alert('Dein Account ist in der Mitarbeiter-Tabelle noch nicht als Admin erkannt.');
+    return;
+  }
   showAdmin(true);
-  loadAdmin();
+  await loadAdmin();
 });
 $('adminBack')?.addEventListener('click',()=>{
   showAdmin(false);

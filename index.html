@@ -6,352 +6,192 @@
 <meta name="theme-color" content="#071522">
 <title>Elb-Herz Ambulanz | Zeiterfassung</title>
 <style>
-:root{
-  --navy:#071522; --navy2:#0d2233; --blue:#08aeea; --blue2:#0077b6;
-  --red:#e43b42; --green:#21c77a; --text:#f4f8fb; --muted:#9fb0bd;
-  --card:rgba(255,255,255,.07); --line:rgba(255,255,255,.12);
-}
-*{box-sizing:border-box}
-body{
-  margin:0; min-height:100vh; font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  color:var(--text); background:
-  radial-gradient(circle at 50% -10%,rgba(8,174,234,.25),transparent 35%),
-  linear-gradient(145deg,#06111b,#0b1f2e 55%,#071522);
-}
-button,input{font:inherit}
-.hidden{display:none!important}
-.screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-.card{
-  width:min(460px,100%); padding:34px; border:1px solid var(--line); border-radius:28px;
-  background:rgba(8,24,37,.82); box-shadow:0 25px 80px rgba(0,0,0,.35); backdrop-filter:blur(18px);
-}
-.brand{text-align:center;margin-bottom:28px}
-.logo{
-  width:108px;height:108px;border-radius:50%;margin:0 auto 16px;display:grid;place-items:center;
-  background:linear-gradient(145deg,#fff,#dceaf2); box-shadow:0 10px 35px rgba(0,0,0,.25);
-  overflow:hidden;
-}
-.logo svg{width:90px;height:90px}
-h1{font-size:28px;margin:0 0 6px;letter-spacing:-.6px}
-h2{margin:0;font-size:22px}
-.subtitle{color:var(--muted);margin:0}
-label{display:block;font-weight:650;margin:18px 0 8px}
-input{
-  width:100%;padding:15px 16px;border-radius:14px;border:1px solid var(--line);
-  background:rgba(255,255,255,.06);color:white;outline:none;
-}
-input:focus{border-color:var(--blue)}
-.btn{
-  width:100%;border:0;border-radius:15px;padding:15px 18px;font-weight:750;cursor:pointer;
-  color:white;background:linear-gradient(135deg,var(--blue),var(--blue2));margin-top:20px;
-  box-shadow:0 10px 25px rgba(0,119,182,.25);
-}
-.demo{font-size:12px;color:var(--muted);text-align:center;margin-top:14px}
-#app{min-height:100vh}
-header{
-  max-width:1000px;margin:auto;padding:22px 22px 10px;display:flex;align-items:center;justify-content:space-between;
-}
-.header-brand{display:flex;align-items:center;gap:12px}
-.mini-logo{width:52px;height:52px;border-radius:15px;background:#fff;display:grid;place-items:center;overflow:hidden}
-.mini-logo svg{width:46px;height:46px}
-.header-brand strong{display:block;font-size:17px}
-.header-brand span{font-size:12px;color:var(--muted)}
-.logout{border:1px solid var(--line);background:var(--card);color:white;border-radius:12px;padding:10px 14px;cursor:pointer}
-main{max-width:1000px;margin:auto;padding:20px 22px 50px}
-.hero{text-align:center;margin:22px 0 28px}
-.kicker{color:var(--blue);font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase}
-.hero h2{font-size:32px;margin-top:8px}
-.status{
-  display:inline-flex;align-items:center;gap:8px;margin-top:10px;padding:8px 12px;border-radius:999px;
-  background:var(--card);color:var(--muted);font-size:13px
-}
-.dot{width:9px;height:9px;border-radius:50%;background:#687782}
-.running .dot{background:var(--green);box-shadow:0 0 14px var(--green)}
-.clock-wrap{display:grid;place-items:center;margin:25px 0 32px}
-.clock{
-  width:min(72vw,310px);aspect-ratio:1;border-radius:50%;border:10px solid rgba(8,174,234,.18);
-  background:radial-gradient(circle at 35% 30%,#153b52,#092033 68%);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  box-shadow:0 0 0 1px rgba(255,255,255,.08),0 25px 70px rgba(0,0,0,.35),inset 0 0 50px rgba(8,174,234,.12);
-  cursor:pointer;transition:.2s transform,.2s border-color;
-}
-.clock:hover{transform:scale(1.02)}
-.clock:active{transform:scale(.98)}
-.clock.running{border-color:rgba(33,199,122,.55)}
-.clock .icon{font-size:38px;margin-bottom:8px}
-.clock .label{font-size:25px;font-weight:850}
-.clock small{margin-top:8px;color:var(--muted)}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.stat{padding:20px;border:1px solid var(--line);border-radius:18px;background:var(--card)}
-.stat small{display:block;color:var(--muted);margin-bottom:7px}.stat strong{font-size:24px}
-.panel{margin-top:18px;padding:22px;border:1px solid var(--line);border-radius:20px;background:var(--card)}
-.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-.clear{background:none;border:0;color:var(--muted);cursor:pointer}
-table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px 8px;border-bottom:1px solid var(--line);font-size:14px}th{color:var(--muted);font-weight:600}
-.empty{text-align:center;color:var(--muted);padding:22px}
-.note{margin-top:18px;color:var(--muted);font-size:12px;line-height:1.5}
+:root{--navy:#071522;--blue:#08aeea;--blue2:#0077b6;--red:#e43b42;--green:#21c77a;--text:#f4f8fb;--muted:#9fb0bd;--card:rgba(255,255,255,.07);--line:rgba(255,255,255,.12)}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);background:radial-gradient(circle at 50% -10%,rgba(8,174,234,.25),transparent 35%),linear-gradient(145deg,#06111b,#0b1f2e 55%,#071522)}
+button,input{font:inherit}.hidden{display:none!important}.screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{width:min(460px,100%);padding:34px;border:1px solid var(--line);border-radius:28px;background:rgba(8,24,37,.82);box-shadow:0 25px 80px rgba(0,0,0,.35);backdrop-filter:blur(18px)}
+.brand{text-align:center;margin-bottom:28px}.logo{width:108px;height:108px;border-radius:50%;margin:0 auto 16px;display:grid;place-items:center;background:linear-gradient(145deg,#fff,#dceaf2);box-shadow:0 10px 35px rgba(0,0,0,.25);overflow:hidden}.logo svg{width:90px;height:90px}
+h1{font-size:28px;margin:0 0 6px;letter-spacing:-.6px}.subtitle{color:var(--muted);margin:0}label{display:block;font-weight:650;margin:18px 0 8px}
+input{width:100%;padding:15px 16px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:white;outline:none}input:focus{border-color:var(--blue)}
+.btn{width:100%;border:0;border-radius:15px;padding:15px 18px;font-weight:750;cursor:pointer;color:white;background:linear-gradient(135deg,var(--blue),var(--blue2));margin-top:20px;box-shadow:0 10px 25px rgba(0,119,182,.25)}.btn:disabled{opacity:.65;cursor:wait}
+.message{font-size:13px;text-align:center;margin-top:14px;min-height:20px}.muted{color:var(--muted)}
+header{max-width:1000px;margin:auto;padding:22px;display:flex;align-items:center;justify-content:space-between}.header-brand{display:flex;align-items:center;gap:12px}.mini-logo{width:52px;height:52px;border-radius:15px;background:#fff;display:grid;place-items:center;overflow:hidden}.mini-logo svg{width:46px;height:46px}.header-brand strong{display:block;font-size:17px}.header-brand span{font-size:12px;color:var(--muted)}.logout{border:1px solid var(--line);background:var(--card);color:white;border-radius:12px;padding:10px 14px;cursor:pointer}
+main{max-width:1000px;margin:auto;padding:20px 22px 50px}.hero{text-align:center;margin:22px 0 28px}.kicker{color:var(--blue);font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase}.hero h2{font-size:32px;margin-top:8px}
+.status{display:inline-flex;align-items:center;gap:8px;margin-top:10px;padding:8px 12px;border-radius:999px;background:var(--card);color:var(--muted);font-size:13px}.dot{width:9px;height:9px;border-radius:50%;background:#687782}.running .dot{background:var(--green);box-shadow:0 0 14px var(--green)}
+.clock-wrap{display:grid;place-items:center;margin:25px 0 32px}.clock{width:min(72vw,310px);aspect-ratio:1;border-radius:50%;border:10px solid rgba(8,174,234,.18);background:radial-gradient(circle at 35% 30%,#153b52,#092033 68%);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 25px 70px rgba(0,0,0,.35),inset 0 0 50px rgba(8,174,234,.12);cursor:pointer;transition:.2s}.clock:hover{transform:scale(1.02)}.clock:active{transform:scale(.98)}.clock.running{border-color:rgba(33,199,122,.55)}.clock .icon{font-size:38px;margin-bottom:8px}.clock .label{font-size:25px;font-weight:850}.clock small{margin-top:8px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.stat{padding:20px;border:1px solid var(--line);border-radius:18px;background:var(--card)}.stat small{display:block;color:var(--muted);margin-bottom:7px}.stat strong{font-size:24px}
+.panel{margin-top:18px;padding:22px;border:1px solid var(--line);border-radius:20px;background:var(--card)}.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.clear{background:none;border:0;color:var(--muted);cursor:pointer}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px 8px;border-bottom:1px solid var(--line);font-size:14px}th{color:var(--muted);font-weight:600}.empty{text-align:center;color:var(--muted);padding:22px}.note{margin-top:18px;color:var(--muted);font-size:12px;line-height:1.5}
 @media(max-width:650px){.grid{grid-template-columns:1fr}.card{padding:26px}.hero h2{font-size:27px}table{font-size:12px}th:nth-child(3),td:nth-child(3){display:none}}
 </style>
 </head>
 <body>
 
-<!-- Einfaches, eingebautes Elb-Herz-Symbol: keine externe Logo-Datei nötig -->
+<!-- Logo ist direkt im HTML eingebaut. Es braucht keine externe Bilddatei. -->
 <svg id="logo-template" style="display:none" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-  <path d="M50 84C45 76 16 58 16 35c0-14 18-22 30-8l4 5 4-5c12-14 30-6 30 8 0 23-29 41-34 49z" fill="none" stroke="#e43b42" stroke-width="7"/>
-  <path d="M17 51c13-10 20-10 31 0s19 10 31 0" fill="none" stroke="#08aeea" stroke-width="7" stroke-linecap="round"/>
-  <path d="M60 53h8l4-10 5 20 5-14 4 4h7" fill="none" stroke="#e43b42" stroke-width="3" stroke-linecap="round"/>
+<path d="M50 84C45 76 16 58 16 35c0-14 18-22 30-8l4 5 4-5c12-14 30-6 30 8 0 23-29 41-34 49z" fill="none" stroke="#e43b42" stroke-width="7"/>
+<path d="M17 51c13-10 20-10 31 0s19 10 31 0" fill="none" stroke="#08aeea" stroke-width="7" stroke-linecap="round"/>
+<path d="M60 53h8l4-10 5 20 5-14 4 4h7" fill="none" stroke="#e43b42" stroke-width="3" stroke-linecap="round"/>
 </svg>
 
 <section id="login" class="screen">
-  <div class="card">
-    <div class="brand">
-      <div class="logo" id="loginLogo"></div>
-      <h1>elb-herz ambulanz</h1>
-      <p class="subtitle">Interne Zeiterfassung für Sanitätsdienste</p>
-    </div>
-    <form id="loginForm">
-      <label for="employee">E-Mail-Adresse</label>
-      <input id="employee" type="email" required placeholder="name@beispiel.de" autocomplete="username">
-      <label for="password">Passwort</label>
-      <input id="password" type="password" required placeholder="Passwort" autocomplete="current-password">
-      <button class="btn">Anmelden</button>
-    </form>
-    <div class="demo" id="loginMessage">Anmeldung über das sichere Supabase-Konto.</div>
-  </div>
+<div class="card">
+<div class="brand"><div class="logo" id="loginLogo"></div><h1>elb-herz ambulanz</h1><p class="subtitle">Interne Zeiterfassung für Sanitätsdienste</p></div>
+<form id="loginForm">
+<label for="email">E-Mail-Adresse</label>
+<input id="email" type="email" required placeholder="name@beispiel.de" autocomplete="username">
+<label for="password">Passwort</label>
+<input id="password" type="password" required placeholder="Passwort" autocomplete="current-password">
+<button class="btn" id="loginButton" type="submit">Anmelden</button>
+</form>
+<div class="message muted" id="loginMessage">Bereit zur Anmeldung.</div>
+</div>
 </section>
 
 <section id="app" class="hidden">
-  <header>
-    <div class="header-brand">
-      <div class="mini-logo" id="appLogo"></div>
-      <div><strong>elb-herz ambulanz</strong><span id="userInfo">Zeiterfassung</span></div>
-    </div>
-    <button class="logout" id="logout">Abmelden</button>
-  </header>
-
-  <main>
-    <div class="hero">
-      <div class="kicker">Sanitätsdienst · Zeiterfassung</div>
-      <h2 id="greeting">Bereit für den Dienst?</h2>
-      <div class="status" id="status"><span class="dot"></span><span id="statusText">Dienst nicht gestartet</span></div>
-    </div>
-
-    <div class="clock-wrap">
-      <button class="clock" id="serviceButton" aria-label="Dienst starten">
-        <div class="icon" id="buttonIcon">▶</div>
-        <div class="label" id="buttonLabel">Dienst starten</div>
-        <small id="buttonTime">Bereit</small>
-      </button>
-    </div>
-
-    <div class="grid">
-      <div class="stat"><small>Heute</small><strong id="todayTotal">0:00 h</strong></div>
-      <div class="stat"><small>Dieser Monat</small><strong id="monthTotal">0:00 h</strong></div>
-      <div class="stat"><small>Dienste</small><strong id="shiftCount">0</strong></div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-head"><h2>Meine Dienste</h2><button class="clear" id="clearHistory">Löschen</button></div>
-      <div id="history"></div>
-    </div>
-    <div class="note">
-      Die Anmeldung läuft sicher über Supabase. Die Zeiterfassungsdaten dieser Version werden weiterhin lokal im Browser gespeichert.
-    </div>
-  </main>
+<header><div class="header-brand"><div class="mini-logo" id="appLogo"></div><div><strong>elb-herz ambulanz</strong><span id="userInfo">Zeiterfassung</span></div></div><button class="logout" id="logout">Abmelden</button></header>
+<main>
+<div class="hero"><div class="kicker">Sanitätsdienst · Zeiterfassung</div><h2 id="greeting">Bereit für den Dienst?</h2><div class="status" id="status"><span class="dot"></span><span id="statusText">Dienst nicht gestartet</span></div></div>
+<div class="clock-wrap"><button class="clock" id="serviceButton" type="button"><div class="icon" id="buttonIcon">▶</div><div class="label" id="buttonLabel">Dienst starten</div><small id="buttonTime">Bereit</small></button></div>
+<div class="grid"><div class="stat"><small>Heute</small><strong id="todayTotal">0:00 h</strong></div><div class="stat"><small>Dieser Monat</small><strong id="monthTotal">0:00 h</strong></div><div class="stat"><small>Dienste</small><strong id="shiftCount">0</strong></div></div>
+<div class="panel"><div class="panel-head"><h2>Meine Dienste</h2><button class="clear" id="clearHistory" type="button">Löschen</button></div><div id="history"></div></div>
+<div class="note">Die Anmeldung läuft über Supabase. Die Zeiterfassungsdaten werden in dieser Version lokal im Browser gespeichert.</div>
+</main>
 </section>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL = 'https://ovvagjvwaneyrlultlzh.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_gTvHpOHBaZyUt7rkW6_Q7A_c-Pm40QB';
+(function(){
+'use strict';
 
-const $ = id => document.getElementById(id);
-const supabaseConfigured =
-  SUPABASE_URL !== 'DEINE_SUPABASE_PROJECT_URL' &&
-  SUPABASE_ANON_KEY !== 'DEIN_SUPABASE_ANON_KEY';
+const SUPABASE_URL='https://ovvagjvwaneyrlultlzh.supabase.co';
+const SUPABASE_KEY='sb_publishable_gTvHpOHBaZyUt7rkW6_Q7A_c-Pm40QB';
 
-let sessionUser = null;
+const $=id=>document.getElementById(id);
+let sb=null;
+let sessionUser=null;
 
-const state = {
-  running: localStorage.getItem('eh_running') === '1',
-  start: Number(localStorage.getItem('eh_start') || 0),
-  history: JSON.parse(localStorage.getItem('eh_history') || '[]')
+const state={
+ running:localStorage.getItem('eh_running')==='1',
+ start:Number(localStorage.getItem('eh_start')||0),
+ history:JSON.parse(localStorage.getItem('eh_history')||'[]')
 };
 
-const supabase = supabaseConfigured
-  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-  : null;
+function message(text,error=false){
+ const el=$('loginMessage');
+ el.textContent=text;
+ el.className='message '+(error?'':'muted');
+ el.style.color=error?'#ff8b91':'';
+}
 
 function putLogo(target){
-  const svg = $('logo-template').cloneNode(true);
-  svg.removeAttribute('id');
-  svg.style.display='block';
-  target.appendChild(svg);
+ const source=$('logo-template');
+ if(!source)return;
+ const svg=source.cloneNode(true);
+ svg.removeAttribute('id');
+ svg.style.display='block';
+ target.appendChild(svg);
 }
-putLogo($('loginLogo'));
-putLogo($('appLogo'));
+putLogo($('loginLogo'));putLogo($('appLogo'));
 
 function save(){
-  localStorage.setItem('eh_running',state.running?'1':'0');
-  localStorage.setItem('eh_start',String(state.start));
-  localStorage.setItem('eh_history',JSON.stringify(state.history));
+ localStorage.setItem('eh_running',state.running?'1':'0');
+ localStorage.setItem('eh_start',String(state.start));
+ localStorage.setItem('eh_history',JSON.stringify(state.history));
 }
-
 function fmt(ms){
-  const total=Math.max(0,Math.floor(ms/1000));
-  const h=Math.floor(total/3600);
-  const m=Math.floor(total%3600/60);
-  return `${h}:${String(m).padStart(2,'0')} h`;
+ const s=Math.max(0,Math.floor(ms/1000)),h=Math.floor(s/3600),m=Math.floor(s%3600/60);
+ return `${h}:${String(m).padStart(2,'0')} h`;
 }
-
-function clockTime(date=new Date()){
-  return date.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+function time(d){return d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});}
+function today(){
+ const d=new Date();let n=0;
+ state.history.forEach(x=>{if(new Date(x.end).toDateString()===d.toDateString())n+=x.duration});
+ return n+(state.running?Date.now()-state.start:0);
 }
-
-function todayMs(){
-  const d=new Date(); let total=0;
-  state.history.forEach(x=>{
-    if(new Date(x.end).toDateString()===d.toDateString()) total+=x.duration;
-  });
-  if(state.running) total+=Date.now()-state.start;
-  return total;
+function month(){
+ const d=new Date();let n=0;
+ state.history.forEach(x=>{const e=new Date(x.end);if(e.getMonth()===d.getMonth()&&e.getFullYear()===d.getFullYear())n+=x.duration});
+ return n+(state.running?Date.now()-state.start:0);
 }
-
-function monthMs(){
-  const d=new Date(); let total=0;
-  state.history.forEach(x=>{
-    const e=new Date(x.end);
-    if(e.getMonth()===d.getMonth() && e.getFullYear()===d.getFullYear()) total+=x.duration;
-  });
-  if(state.running) total+=Date.now()-state.start;
-  return total;
-}
-
-function showLoginMessage(message, error=false){
-  const el = $('loginMessage');
-  el.textContent = message;
-  el.style.color = error ? '#ff8b91' : '';
-}
-
 function render(){
-  const loggedIn = !!sessionUser;
-  $('login').classList.toggle('hidden',loggedIn);
-  $('app').classList.toggle('hidden',!loggedIn);
-  if(!loggedIn) return;
-
-  $('userInfo').textContent = sessionUser.email || 'Angemeldet';
-  $('greeting').textContent=state.running?'Dienst läuft':'Bereit für den Dienst?';
-  $('status').classList.toggle('running',state.running);
-  $('statusText').textContent=state.running
-    ? 'Dienst läuft seit '+clockTime(new Date(state.start))
-    : 'Dienst nicht gestartet';
-  $('serviceButton').classList.toggle('running',state.running);
-  $('buttonIcon').textContent=state.running?'■':'▶';
-  $('buttonLabel').textContent=state.running?'Dienst beenden':'Dienst starten';
-  $('buttonTime').textContent=state.running?fmt(Date.now()-state.start):'Bereit';
-  $('todayTotal').textContent=fmt(todayMs());
-  $('monthTotal').textContent=fmt(monthMs());
-  $('shiftCount').textContent=state.history.length+(state.running?1:0);
-
-  if(!state.history.length){
-    $('history').innerHTML='<div class="empty">Noch keine abgeschlossenen Dienste.</div>';
-    return;
-  }
-
-  $('history').innerHTML='<table><thead><tr><th>Datum</th><th>Zeitraum</th><th>Dauer</th></tr></thead><tbody>'+
-    state.history.slice().reverse().map(x=>`<tr><td>${new Date(x.start).toLocaleDateString('de-DE')}</td><td>${clockTime(new Date(x.start))} – ${clockTime(new Date(x.end))}</td><td>${fmt(x.duration)}</td></tr>`).join('')+
-    '</tbody></table>';
+ const logged=!!sessionUser;
+ $('login').classList.toggle('hidden',logged);
+ $('app').classList.toggle('hidden',!logged);
+ if(!logged)return;
+ $('userInfo').textContent=sessionUser.email||'Angemeldet';
+ $('greeting').textContent=state.running?'Dienst läuft':'Bereit für den Dienst?';
+ $('status').classList.toggle('running',state.running);
+ $('statusText').textContent=state.running?'Dienst läuft seit '+time(new Date(state.start)):'Dienst nicht gestartet';
+ $('serviceButton').classList.toggle('running',state.running);
+ $('buttonIcon').textContent=state.running?'■':'▶';
+ $('buttonLabel').textContent=state.running?'Dienst beenden':'Dienst starten';
+ $('buttonTime').textContent=state.running?fmt(Date.now()-state.start):'Bereit';
+ $('todayTotal').textContent=fmt(today());$('monthTotal').textContent=fmt(month());
+ $('shiftCount').textContent=state.history.length+(state.running?1:0);
+ if(!state.history.length){$('history').innerHTML='<div class="empty">Noch keine abgeschlossenen Dienste.</div>';return;}
+ $('history').innerHTML='<table><thead><tr><th>Datum</th><th>Zeitraum</th><th>Dauer</th></tr></thead><tbody>'+
+ state.history.slice().reverse().map(x=>`<tr><td>${new Date(x.start).toLocaleDateString('de-DE')}</td><td>${time(new Date(x.start))} – ${time(new Date(x.end))}</td><td>${fmt(x.duration)}</td></tr>`).join('')+
+ '</tbody></table>';
 }
 
-$('loginForm').addEventListener('submit', async e=>{
-  e.preventDefault();
-
-  const email = $('employee').value.trim();
-  const password = $('password').value;
-
-  if(!supabaseConfigured){
-    showLoginMessage('Supabase ist noch nicht eingetragen: URL und Anon-Key in index.html einsetzen.', true);
-    return;
-  }
-
-  const button = e.submitter;
-  button.disabled = true;
-  button.textContent = 'Anmeldung läuft …';
-  showLoginMessage('Anmeldung wird geprüft …');
-
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  button.disabled = false;
-  button.textContent = 'Anmelden';
-
-    if(error){
-    showLoginMessage('Anmeldung fehlgeschlagen. E-Mail oder Passwort prüfen.', true);
-    return;
-  }
-
-  sessionUser = data.user;
-  $('password').value = '';
-  showLoginMessage('Erfolgreich angemeldet.');
+$('loginForm').addEventListener('submit',async function(e){
+ e.preventDefault();
+ const email=$('email').value.trim(),password=$('password').value;
+ const btn=$('loginButton');
+ if(!sb){message('Supabase konnte nicht geladen werden. Bitte Seite komplett neu laden.',true);return;}
+ btn.disabled=true;btn.textContent='Anmeldung läuft …';message('Anmeldung wird geprüft …');
+ try{
+  const result=await sb.auth.signInWithPassword({email,password});
+  if(result.error)throw result.error;
+  if(!result.data||!result.data.user)throw new Error('Supabase hat keinen Benutzer zurückgegeben.');
+  sessionUser=result.data.user;
+  $('password').value='';
+  message('Erfolgreich angemeldet.');
   render();
+ }catch(err){
+  console.error(err);
+  message('Login-Fehler: '+(err&&err.message?err.message:String(err)),true);
+ }finally{
+  btn.disabled=false;btn.textContent='Anmelden';
+ }
 });
 
-$('serviceButton').addEventListener('click',()=>{
-  if(!sessionUser) return;
+$('serviceButton').addEventListener('click',function(){
+ if(!sessionUser)return;
+ if(!state.running){state.running=true;state.start=Date.now();}
+ else{const end=Date.now();state.history.push({start:state.start,end,duration:end-state.start});state.running=false;state.start=0;}
+ save();render();
+});
 
-  if(!state.running){
-    state.running=true;
-    state.start=Date.now();
-  } else {
-    const end=Date.now();
-    state.history.push({
-      start:state.start,
-      end,
-      duration:end-state.start
-    });
-    state.running=false;
-    state.start=0;
+$('logout').addEventListener('click',async function(){
+ if(state.running&&!confirm('Der Dienst läuft noch. Wirklich abmelden?'))return;
+ try{if(sb)await sb.auth.signOut();}catch(e){console.error(e);}
+ sessionUser=null;render();
+});
+
+$('clearHistory').addEventListener('click',function(){
+ if(confirm('Alle gespeicherten Dienste auf diesem Gerät löschen?')){state.history=[];save();render();}
+});
+
+async function start(){
+ try{
+  if(!window.supabase||!window.supabase.createClient){
+   message('Die Supabase-Bibliothek konnte nicht geladen werden. Prüfe die Internetverbindung und lade die Seite neu.',true);
+   return;
   }
-
-  save();
+  sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  const {data,error}=await sb.auth.getSession();
+  if(error)throw error;
+  sessionUser=data.session?data.session.user:null;
+  sb.auth.onAuthStateChange(function(_event,session){sessionUser=session?session.user:null;render();});
   render();
-});
-
-$('logout').addEventListener('click', async ()=>{
-  if(state.running && !confirm('Der Dienst läuft noch. Wirklich abmelden?')) return;
-
-  if(supabase){
-    await supabase.auth.signOut();
-  }
-
-  sessionUser = null;
-  render();
-});
-
-$('clearHistory').addEventListener('click',()=>{
-  if(confirm('Alle gespeicherten Dienste auf diesem Gerät löschen?')){
-    state.history=[];
-    save();
-    render();
-  }
-});
-
-if(supabase){
-  supabase.auth.getSession().then(({data})=>{
-    sessionUser = data.session?.user || null;
-    render();
-  });
-
-  supabase.auth.onAuthStateChange((_event, session)=>{
-    sessionUser = session?.user || null;
-    render();
-  });
+ }catch(err){
+  console.error(err);
+  message('Supabase-Fehler: '+(err&&err.message?err.message:String(err)),true);
+ }
 }
-
 setInterval(render,1000);
-render();
+start();
+})();
 </script>
 </body>
 </html>

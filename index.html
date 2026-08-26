@@ -287,7 +287,7 @@ $('loginForm').addEventListener('submit', async e=>{
   button.disabled = false;
   button.textContent = 'Anmelden';
 
-  if(error){
+    if(error){
     showLoginMessage('Anmeldung fehlgeschlagen. E-Mail oder Passwort prüfen.', true);
     return;
   }

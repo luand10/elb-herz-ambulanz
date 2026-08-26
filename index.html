@@ -215,7 +215,7 @@ function durationFor(row){
 
 async function loadShifts(){
  if(!sessionUser)return;
- const response=await authFetch('/shifts?user_id=eq.'+encodeURIComponent(sessionUser.id)+'&select=id,user_id,start_time,end_time,duration_ms,created_at&order=start_time.desc');
+ const response=await authFetch('/shifts?user_id=eq.'+encodeURIComponent(sessionUser.id)+'&select=id,user_id,start_time,end_time,duration_ms,created_at,shift_type,location,note&order=start_time.desc');
  let data=[];
  try{data=await response.json();}catch(_){ }
  if(!response.ok)throw new Error(data.message||data.error||'Die Dienste konnten nicht geladen werden.');
@@ -268,33 +268,22 @@ function render(){
   $('history').innerHTML='<div class="empty">Der aktuelle Dienst läuft. Noch keine abgeschlossenen Dienste.</div>';
   return;
  }
- $('history').innerHTML='<table><thead><tr><th>Datum</th><th>Zeitraum</th><th>Dauer</th></tr></thead><tbody>'+rows.map(x=>{
-  const s=new Date(x.start_time),e=new Date(x.end_time);
-  return `<tr><td>${localDate(s)}</td><td>${time(s)} – ${time(e)}</td><td>${fmt(durationFor(x))}</td></tr>`;
- }).join('')+'</tbody></table>';
-}
+ $('history').innerHTML='<table><thead><tr><th>Datum</th><th>Einsatz</th><th>Zeitraum</th><th>Dauer</th></tr></thead><tbody>'+rows.map(x=>{
+ const st=new Date(x.start_time),en=new Date(x.end_time);
+ return `<tr><td>${localDate(st)}</td><td><strong>${x.shift_type||'Sanitätsdienst'}</strong><br><span style="color:var(--muted)">${x.location||'—'}</span></td><td>${time(st)} – ${time(en)}</td><td>${fmt(durationFor(x))}</td></tr>`;
+}).join('')+'</tbody></table>';
+ }
 
-async function startShift(){
- if(!sessionUser||syncBusy)return;
- syncBusy=true;
- appMessage('Dienst wird gespeichert …');
+async function startShift(type,location,note){
+ if(!sessionUser||syncBusy)return; syncBusy=true; appMessage('Dienst wird gespeichert …');
  try{
-  // Vor dem Start noch einmal vom Server lesen, damit kein zweiter offener Dienst entsteht.
-  await loadShifts();
-  if(currentShift){appMessage('Es läuft bereits ein Dienst.');return;}
-  const response=await authFetch('/shifts',{
-   method:'POST',
-   headers:{'Prefer':'return=representation'},
-   body:JSON.stringify({user_id:sessionUser.id,start_time:new Date().toISOString()})
-  });
-  let data=[];try{data=await response.json();}catch(_){ }
+  await loadShifts(); if(currentShift){appMessage('Es läuft bereits ein Dienst.');return;}
+  const response=await authFetch('/shifts',{method:'POST',headers:{'Prefer':'return=representation'},body:JSON.stringify({user_id:sessionUser.id,start_time:new Date().toISOString(),shift_type:type,location,note})});
+  let data=[];try{data=await response.json();}catch(_){}
   if(!response.ok)throw new Error(data.message||data.error||'Der Dienst konnte nicht gestartet werden.');
-  currentShift=data[0]||null;
-  await loadShifts();
-  appMessage('Dienst gestartet.');
- }catch(err){
-  console.error(err);appMessage('Fehler: '+(err.message||String(err)),true);
- }finally{syncBusy=false;}
+  currentShift=data[0]||null; await loadShifts(); appMessage('Dienst gestartet.');
+ }catch(err){console.error(err);appMessage('Fehler: '+(err.message||String(err)),true);}
+ finally{syncBusy=false;}
 }
 
 async function stopShift(){
@@ -343,9 +332,19 @@ $('loginForm').addEventListener('submit',async function(e){
 
 $('serviceButton').addEventListener('click',async function(){
  if(!sessionUser)return;
- if(currentShift)await stopShift();else await startShift();
+ if(currentShift){await stopShift();return;}
+ $('shiftType').value='Sanitätsdienst';$('shiftLocation').value='';$('shiftNote').value='';$('shiftModalMessage').textContent='';$('shiftModal').classList.remove('hidden');
 });
 
+$('closeShiftModal').addEventListener('click',()=> $('shiftModal').classList.add('hidden'));
+$('shiftModal').addEventListener('click',e=>{if(e.target.id==='shiftModal')$('shiftModal').classList.add('hidden');});
+$('confirmShiftStart').addEventListener('click',async function(){
+ const type=$('shiftType').value,location=$('shiftLocation').value.trim(),note=$('shiftNote').value.trim(),msg=$('shiftModalMessage');
+ if(!location){msg.textContent='Bitte einen Einsatzort eingeben.';msg.style.color='#ff8b91';return;}
+ const btn=$('confirmShiftStart');btn.disabled=true;btn.textContent='Wird gespeichert …';
+ try{await startShift(type,location,note);if(currentShift)$('shiftModal').classList.add('hidden');}
+ finally{btn.disabled=false;btn.textContent='Dienst starten';}
+});
 $('logout').addEventListener('click',async function(){
  if(currentShift&&!confirm('Der Dienst läuft noch. Wirklich abmelden?'))return;
  try{
@@ -420,7 +419,7 @@ async function loadAdmin(){
   try{
     const [empResponse,shiftResponse]=await Promise.all([
       authFetch('/employees?select=user_id,name,employee_no,role&order=name.asc'),
-      authFetch('/shifts?select=id,user_id,start_time,end_time,duration_ms,created_at&order=start_time.desc')
+      authFetch('/shifts?select=id,user_id,start_time,end_time,duration_ms,created_at,shift_type,location,note&order=start_time.desc')
     ]);
     let emps=[],shifts=[];
     try{emps=await empResponse.json();}catch(_){}
@@ -440,6 +439,9 @@ async function loadAdmin(){
     $('adminTotalHours').textContent=msFmt(total);
     $('adminRunning').textContent=String(running);
     $('adminStatus').textContent=`${adminEmployees.length} Mitarbeiter · ${monthRows.length} Dienste im aktuellen Monat`;
+ const recent=adminRows.slice(0,50);
+ $('adminShiftTable').innerHTML=recent.length?'<table><thead><tr><th>Datum</th><th>Mitarbeiter</th><th>Dienstart</th><th>Einsatzort</th><th>Zeitraum</th><th>Dauer</th></tr></thead><tbody>'+
+ recent.map(x=>{const st=new Date(x.start_time),en=x.end_time?new Date(x.end_time):null;return `<tr><td>${localDate(st)}</td><td>${employeeName(x.user_id)}</td><td>${x.shift_type||'Sanitätsdienst'}</td><td>${x.location||'—'}</td><td>${time(st)} – ${en?time(en):'läuft'}</td><td>${msFmt(x.end_time?Number(x.duration_ms)||durationFor(x):durationFor(x))}</td></tr>`}).join('')+'</tbody></table>':'<div class="empty">Noch keine Dienste vorhanden.</div>';
 
     const grouped={};
     monthRows.forEach(x=>{
@@ -495,10 +497,10 @@ $('adminBack')?.addEventListener('click',()=>{
 });
 $('exportCsv')?.addEventListener('click',()=>{
   if(!adminRows.length)return;
-  const header=['ID','Mitarbeiter','Mitarbeiternummer','Mitarbeiter-ID','Start','Ende','Dauer (ms)'];
+  const header=['ID','Mitarbeiter','Mitarbeiternummer','Mitarbeiter-ID','Dienstart','Einsatzort','Notiz','Start','Ende','Dauer (ms)'];
   const lines=[header.join(';')].concat(adminRows.map(x=>[
     x.id,employeeName(x.user_id),adminEmployees.find(e=>e.user_id===x.user_id)?.employee_no||'',
-    x.user_id,x.start_time,x.end_time||'',x.duration_ms||durationFor(x)
+    x.user_id,x.shift_type||'Sanitätsdienst',x.location||'',x.note||'',x.start_time,x.end_time||'',x.duration_ms||durationFor(x)
   ].map(v=>`"${String(v).replaceAll('"','""')}"`).join(';')));
   const blob=new Blob(['\ufeff'+lines.join('\n')],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='elb-herz-dienste.csv';a.click();
@@ -507,6 +509,17 @@ $('exportCsv')?.addEventListener('click',()=>{
 
 })();
 </script>
+
+
+<div id="shiftModal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.68);z-index:50;display:grid;place-items:center;padding:20px">
+<div class="card" style="max-width:500px;width:100%">
+<div class="panel-head"><h2>Dienst starten</h2><button class="clear" id="closeShiftModal" type="button">✕</button></div>
+<label for="shiftType">Dienstart</label>
+<select id="shiftType" style="width:100%;padding:15px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:white"><option>Sanitätsdienst</option><option>Veranstaltung</option><option>Bereitschaft</option><option>Sonstiger Dienst</option></select>
+<label for="shiftLocation">Einsatzort</label><input id="shiftLocation" type="text" placeholder="z. B. Stadtfest Hamburg">
+<label for="shiftNote">Notiz (optional)</label><textarea id="shiftNote" rows="3" placeholder="Weitere Informationen zum Dienst" style="width:100%;padding:15px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:white"></textarea>
+<button class="btn" id="confirmShiftStart" type="button">Dienst starten</button><div class="message muted" id="shiftModalMessage"></div>
+</div></div>
 
 <section id="adminApp" class="hidden">
 <header>
@@ -529,7 +542,7 @@ $('exportCsv')?.addEventListener('click',()=>{
   </div>
   <div class="panel">
     <div class="panel-head"><h2>Mitarbeiter-Auswertung</h2><button class="clear" id="exportCsv" type="button">CSV exportieren</button></div>
-    <div id="adminTable"><div class="empty">Noch keine Daten.</div></div>
+    <div id="adminTable"><div class="empty">Noch keine Daten.</div></div></div><div class="panel"><div class="panel-head"><h2>Letzte Dienste</h2></div><div id="adminShiftTable"><div class="empty">Noch keine Daten.</div></div>
   </div>
   <div class="note">Mitarbeitername und Mitarbeiternummer werden aus dem geschützten Supabase-Profil geladen. Admin-Rechte werden über die Rolle in Supabase geprüft.</div>
 </main>

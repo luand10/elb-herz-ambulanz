@@ -499,20 +499,45 @@ async function saveEmployees(){
   }finally{if(btn)btn.disabled=false;}
 }
 $('adminButton')?.addEventListener('click',async()=>{
-  // Profil vor dem Öffnen noch einmal laden, damit ein frisch gesetzter
-  // Admin-Status sofort erkannt wird.
-  await loadEmployeeProfile();
-  render();
+  // Das Dashboard sofort öffnen. Dadurch hängt die Navigation nicht
+  // davon ab, ob das erneute Laden des Profils kurz dauert.
+  if(!sessionUser){
+    alert('Bitte zuerst anmelden.');
+    return;
+  }
+
+  if(!isAdmin()){
+    await loadEmployeeProfile();
+    render();
+  }
+
   if(!isAdmin()){
     alert('Dein Account ist in der Mitarbeiter-Tabelle noch nicht als Admin erkannt.');
     return;
   }
+
   showAdmin(true);
-  await loadAdmin();
+
+  try{
+    await loadAdmin();
+  }catch(err){
+    console.error('Admin-Dashboard:',err);
+  }
 });
 $('adminBack')?.addEventListener('click',()=>{
   showAdmin(false);
   render();
+});
+
+document.addEventListener('DOMContentLoaded',()=>{
+  const back=$('adminBack');
+  if(back && !back.dataset.bound){
+    back.dataset.bound='1';
+    back.addEventListener('click',()=>{
+      showAdmin(false);
+      render();
+    });
+  }
 });
 $('exportCsv')?.addEventListener('click',()=>{
   if(!adminRows.length)return;
